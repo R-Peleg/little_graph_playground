@@ -12,6 +12,11 @@ export interface GraphEdge {
   to: string;   // node id
 }
 
+export interface GraphDef {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+}
+
 // Define the props for the component
 export interface GraphPlotterProps {
   nodes: GraphNode[];

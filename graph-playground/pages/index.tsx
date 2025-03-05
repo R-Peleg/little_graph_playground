@@ -1,25 +1,21 @@
 import React, { useState } from 'react';
-import GraphPlotter, {GraphEdge, GraphNode} from '../componenets/GraphPlotter';
+import GraphPlotter from '../componenets/GraphPlotter';
 import ColorCyclePlotter from '@/componenets/ColorCyclesPlotter';
 import { K4 } from '../graphs/k4';
+import { UndirectedGraph } from 'graphology';
 
 export default function Home() {
-  const [nodes, setNodes] = useState<GraphNode[]>(K4.nodes);
+  const [graph] = useState<UndirectedGraph>(() => K4());
 
-  // Define initial edges (undirected graph)
-  const [edges] = useState<GraphEdge[]>(K4.edges);
-
-  // Callback function to handle updates from the GraphPlotter
-  const handleGraphUpdate = (updatedNodes: GraphNode[], updatedEdges: GraphEdge[]) => {
-    console.log("Graph updated!", updatedNodes, updatedEdges);
-    setNodes(updatedNodes); // Update local state with new node positions
+  const handleGraphUpdate = (updatedGraph: UndirectedGraph) => {
+    console.log("Graph updated!", updatedGraph);
   };
   
   return <div>
     <h1>Graph Playground</h1>
     <h2>The Graph</h2>
-    <GraphPlotter nodes={nodes} edges={edges} onGraphUpdate={handleGraphUpdate} />
+    <GraphPlotter graph={graph} onGraphUpdate={handleGraphUpdate} />
     <h2>Cycle Decomposition</h2>
-    <ColorCyclePlotter nodes={nodes} edges={edges} />
+    <ColorCyclePlotter graph={graph} />
   </div>
 }

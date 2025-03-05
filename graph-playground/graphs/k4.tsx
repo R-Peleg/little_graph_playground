@@ -1,18 +1,17 @@
-import { GraphDef } from "@/componenets/GraphPlotter"
+import { UndirectedGraph } from "graphology";
 
-
-export const K4: GraphDef = {
-    nodes: [
-        { id: "1", x: 150, y: 100 },
-        { id: "2", x: 250, y: 100 },
-        { id: "3", x: 150, y: 200 },
-        { id: "4", x: 250, y: 200 },
-      ],
-    
-      // Fully connect all 4 nodes (K4 has all possible edges)
-      edges: [
-        { from: "1", to: "2" }, { from: "1", to: "3" }, { from: "1", to: "4" },
-        { from: "2", to: "3" }, { from: "2", to: "4" },
-        { from: "3", to: "4" }
-      ]
+export function K4(): UndirectedGraph {
+  const k4 = new UndirectedGraph();
+  k4.addNode("1", { x: 150, y: 100 });
+  k4.addNode("2", { x: 250, y: 100 });
+  k4.addNode("3", { x: 150, y: 200 });
+  k4.addNode("4", { x: 250, y: 200 });
+  
+  k4.addEdgeWithKey("1-2", "1", "2");
+  k4.addEdgeWithKey("1-3", "1", "3");
+  k4.addEdgeWithKey("1-4", "1", "4");
+  k4.addEdgeWithKey("2-3", "2", "3");
+  k4.addEdgeWithKey("2-4", "2", "4");
+  k4.addEdgeWithKey("3-4", "3", "4");
+  return k4;
 }

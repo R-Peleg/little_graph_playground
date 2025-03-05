@@ -1,30 +1,31 @@
 import React from 'react';
-import GraphPlotter, { GraphEdge, GraphNode } from './GraphPlotter';
+import GraphPlotter from './GraphPlotter';
 import { UndirectedGraph, DirectedGraph } from 'graphology'
 import { greedyEdgeColoring } from '@/algo/edge_coloring';
 
 // Define the props for the component
 export interface ColorCyclePlotterProps {
-  nodes: GraphNode[];
-  edges: GraphEdge[];
+  graph: UndirectedGraph;
 }
 
 const decomposeIntoCycles = (graph: UndirectedGraph): DirectedGraph[] => {
   const digraph = new DirectedGraph();
-  graph.forEachNode(node => digraph.addNode(node));
+  graph.forEachNode((node, attributes) => digraph.addNode(node, attributes));
   graph.forEachEdge((edge, attrs, source, target) => {
     digraph.addEdgeWithKey(`${source}->${target}`, source, target, attrs);
     digraph.addEdgeWithKey(`${target}->${source}`, target, source, attrs);
   });
   const cycles: DirectedGraph[] = [];
   const visitedEdges = new Set();
+  const allColors = graph.edges().map(edge => graph.getEdgeAttribute(edge, 'color'));
+  const distColors = [...new Set(allColors)];
 
   const getNextEdge = (node: string, color: number) => {
     const edges = digraph.outEdges(node);
     for (const edge of edges) {
       const [source, target] = digraph.extremities(edge);
       const edgeColor = digraph.getDirectedEdgeAttribute(source, target, 'color');
-      if (edgeColor === color && !visitedEdges.has(edge)) {
+      if (edgeColor === color) {
         return edge;
       }
     }
@@ -36,10 +37,10 @@ const decomposeIntoCycles = (graph: UndirectedGraph): DirectedGraph[] => {
       return;
     }
     const cycle = new DirectedGraph();
-    digraph.forEachNode(node => cycle.addNode(node));
+    digraph.forEachNode((node, attributes) => cycle.addNode(node, attributes));
     let currentEdge = edge;
     let currentNode = source;
-    let currentColor = attributes.color;
+    let currentColor = distColors.findIndex(c => c == attributes.color);
 
     while (currentEdge && !visitedEdges.has(currentEdge)) {
       if (visitedEdges.has(currentEdge)) {
@@ -47,13 +48,17 @@ const decomposeIntoCycles = (graph: UndirectedGraph): DirectedGraph[] => {
       }
       visitedEdges.add(currentEdge);
       const nextNode = digraph.opposite(currentNode, currentEdge);
-      cycle.addEdgeWithKey(currentEdge, currentNode, target, attributes);
+      const currentEdgeAttributes = digraph.getEdgeAttributes(currentEdge);
+      cycle.addEdgeWithKey(currentEdge, currentNode, nextNode, currentEdgeAttributes);
       currentNode = nextNode;
       currentColor = (currentColor + 1) % 3;
-      const nextEdge = getNextEdge(currentNode, currentColor);
+      const nextEdge = getNextEdge(currentNode, distColors[currentColor]);
       if (!nextEdge) break;
       currentEdge = nextEdge;
     }
+    cycle.forEachNode((node, attributes) => {
+      console.log(node, attributes);
+    });
 
     cycles.push(cycle);
   });
@@ -61,42 +66,29 @@ const decomposeIntoCycles = (graph: UndirectedGraph): DirectedGraph[] => {
   return cycles;
 };
 
-const ColorCyclePlotter: React.FC<ColorCyclePlotterProps> = ({ nodes, edges }) => {
-  const graph_obj = new UndirectedGraph();
-  nodes.forEach(node => {
-    graph_obj.addNode(node.id);
-  })
-  edges.forEach(edge => {
-    graph_obj.addEdgeWithKey(`${edge.from}-${edge.to}`, edge.from, edge.to);
-  })
-  greedyEdgeColoring(graph_obj, 3);
-  const coloredEdges = edges.map(edge => {
-    const edge_color_num = graph_obj.getUndirectedEdgeAttribute(edge.from, edge.to, 'color') as number
-    const edge_color = {
-        0: 'red', 1: 'green', 2: 'blue'
-    }[edge_color_num]
-    return {
-    ...edge,
-    color: edge_color
-  }})
-  const cycles = decomposeIntoCycles(graph_obj);
+const ColorCyclePlotter: React.FC<ColorCyclePlotterProps> = ({ graph }) => {
+  const coloredGraph = graph.copy();
+  greedyEdgeColoring(coloredGraph, 3);
+  coloredGraph.forEachEdge((edge, attributes, source, target) => {
+    const edge_color_num = coloredGraph.getUndirectedEdgeAttribute(source, target, 'color') as number;
+    const edge_color = { 0: 'red', 1: 'green', 2: 'blue' }[edge_color_num];
+    coloredGraph.setEdgeAttribute(edge, 'color', edge_color);
+  });
+  const cycles = decomposeIntoCycles(coloredGraph);
   return (
     <div>
         <p>Graph Coloring</p>
         <GraphPlotter
-            nodes={nodes}
-            edges={coloredEdges}
+            graph={coloredGraph}
         />
         <div>
           <h3>Cycles</h3>
           {cycles.map((cycle, index) => (
             <div key={index}>
               <p>Cycle {index + 1}:</p>
-              <ul>
-                {cycle.mapEdges((edge, source, destination) => (
-                  <li key={edge}>{edge}</li>
-                ))}
-              </ul>
+              <GraphPlotter
+                graph={cycle}
+              />
             </div>
           ))}
         </div>

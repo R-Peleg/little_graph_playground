@@ -88,6 +88,8 @@ const ColorCyclePlotter: React.FC<ColorCyclePlotterProps> = ({ graph }) => {
               <p>Cycle {index + 1}:</p>
               <GraphPlotter
                 graph={cycle}
+                height={250}
+                width={300}
               />
             </div>
           ))}

@@ -5,11 +5,13 @@ import { UndirectedGraph } from 'graphology';
 export interface GraphPlotterProps {
   graph: UndirectedGraph;
   onGraphUpdate?: (graph: UndirectedGraph) => void;
+  width?: number;
+  height?: number;
 }
 
 // The stateful component that manages node positions internally.
 // It resets its internal state when the incoming nodes or edges change.
-const GraphPlotter: React.FC<GraphPlotterProps> = ({ graph, onGraphUpdate }) => {
+const GraphPlotter: React.FC<GraphPlotterProps> = ({ graph, onGraphUpdate, width = 500, height = 500 }) => {
   // A sample event handler to update a node's position when it is clicked.
   const handleNodeClick = (node: { id: string; x: number; y: number; color?: string }) => {
     // For demonstration, move the clicked node by +10 on both axes.
@@ -21,7 +23,7 @@ const GraphPlotter: React.FC<GraphPlotterProps> = ({ graph, onGraphUpdate }) => 
   };
 
   return (
-    <svg width={500} height={500} style={{ border: '1px solid #ccc' }}>
+    <svg width={width} height={height} style={{ border: '1px solid #ccc' }}>
       {/* Render edges as lines connecting nodes */}
       {graph.mapEdges((edge, attributes, source, target, sourceAttrs, targetAttrs, undirected) => {
         const fromNode = graph.getNodeAttributes(source);

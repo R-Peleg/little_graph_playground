@@ -10,26 +10,6 @@ export interface GraphPlotterProps {
 // The stateful component that manages node positions internally.
 // It resets its internal state when the incoming nodes or edges change.
 const GraphPlotter: React.FC<GraphPlotterProps> = ({ graph, onGraphUpdate }) => {
-  const nodes = graph.nodes().map(node => ({
-    id: node,
-    x: graph.getNodeAttribute(node, 'x'),
-    y: graph.getNodeAttribute(node, 'y'),
-    color: graph.getNodeAttribute(node, 'color'),
-  }));
-
-  const edges = graph.edges().map(edge => ({
-    id: edge,
-    from: graph.source(edge),
-    to: graph.target(edge),
-    color: graph.getEdgeAttribute(edge, 'color'),
-  }));
-
-  console.log('plotting graph');
-  edges.forEach(edge => {
-    console.log(edge);
-  }
-  );
-
   // A sample event handler to update a node's position when it is clicked.
   const handleNodeClick = (node: { id: string; x: number; y: number; color?: string }) => {
     // For demonstration, move the clicked node by +10 on both axes.
@@ -46,8 +26,6 @@ const GraphPlotter: React.FC<GraphPlotterProps> = ({ graph, onGraphUpdate }) => 
       {graph.mapEdges((edge, attributes, source, target) => {
         const fromNode = graph.getNodeAttributes(source);
         const toNode = graph.getNodeAttributes(target);
-        console.log(fromNode);
-        console.log(toNode);
         if (!fromNode || !toNode) return null;
         return (
           <line
@@ -61,15 +39,15 @@ const GraphPlotter: React.FC<GraphPlotterProps> = ({ graph, onGraphUpdate }) => 
         );
       })}
       {/* Render nodes as circles */}
-      {nodes.map(node => (
+      {graph.mapNodes((node, attributes) => (
         <circle
-          key={node.id}
-          cx={node.x}
-          cy={node.y}
+          key={node}
+          cx={attributes.x}
+          cy={attributes.y}
           r={10}
-          fill={node.color || "blue"}
+          fill={attributes.color || "blue"}
           style={{ cursor: 'pointer' }}
-          onClick={() => handleNodeClick(node)}
+          onClick={() => handleNodeClick({id: node, x: attributes.x, y: attributes.y, color: attributes.color})}
         />
       ))}
     </svg>

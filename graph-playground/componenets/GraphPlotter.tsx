@@ -23,19 +23,36 @@ const GraphPlotter: React.FC<GraphPlotterProps> = ({ graph, onGraphUpdate }) => 
   return (
     <svg width={500} height={500} style={{ border: '1px solid #ccc' }}>
       {/* Render edges as lines connecting nodes */}
-      {graph.mapEdges((edge, attributes, source, target) => {
+      {graph.mapEdges((edge, attributes, source, target, sourceAttrs, targetAttrs, undirected) => {
         const fromNode = graph.getNodeAttributes(source);
         const toNode = graph.getNodeAttributes(target);
         if (!fromNode || !toNode) return null;
+
+        const dx = toNode.x - fromNode.x;
+        const dy = toNode.y - fromNode.y;
+        const angle = Math.atan2(dy, dx);
+        const arrowSize = 20;
+
         return (
-          <line
-            key={`edge-${edge}`}
-            x1={fromNode.x}
-            y1={fromNode.y}
-            x2={toNode.x}
-            y2={toNode.y}
-            stroke={attributes.color || "black"}
-          />
+          <g key={`edge-${edge}`}>
+            <line
+              x1={fromNode.x}
+              y1={fromNode.y}
+              x2={toNode.x}
+              y2={toNode.y}
+              stroke={attributes.color || "black"}
+            />
+            {!undirected && (
+              <polygon
+                points={`
+                  ${toNode.x},${toNode.y} 
+                  ${toNode.x - arrowSize * Math.cos(Math.PI / 6 + angle)},${toNode.y - arrowSize * Math.sin(Math.PI / 6 + angle)} 
+                  ${toNode.x - arrowSize * Math.cos(-Math.PI / 6 + angle)},${toNode.y - arrowSize * Math.sin(-Math.PI / 6 + angle)}
+                `}
+                fill={attributes.color || "black"}
+              />
+            )}
+          </g>
         );
       })}
       {/* Render nodes as circles */}

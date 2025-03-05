@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import GraphPlotter, {GraphEdge, GraphNode} from '../componenets/GraphPlotter';
+import ColorCyclePlotter from '@/componenets/ColorCyclesPlotter';
 import { K4 } from '../graphs/k4';
 
 export default function Home() {
@@ -15,8 +16,10 @@ export default function Home() {
   };
   
   return <div>
-    Graph Playground
+    <h1>Graph Playground</h1>
+    <h2>The Graph</h2>
     <GraphPlotter nodes={nodes} edges={edges} onGraphUpdate={handleGraphUpdate} />
-
+    <h2>Cycle Decomposition</h2>
+    <ColorCyclePlotter nodes={nodes} edges={edges} />
   </div>
 }

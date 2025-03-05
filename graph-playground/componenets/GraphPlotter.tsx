@@ -10,6 +10,7 @@ export interface GraphNode {
 export interface GraphEdge {
   from: string; // node id
   to: string;   // node id
+  color?: string; // Optional coloring for the edge
 }
 
 export interface GraphDef {
@@ -61,7 +62,7 @@ const GraphPlotter: React.FC<GraphPlotterProps> = ({ nodes: initialNodes, edges,
             y1={fromNode.y}
             x2={toNode.x}
             y2={toNode.y}
-            stroke="black"
+            stroke={edge.color || "black"}
           />
         );
       })}
